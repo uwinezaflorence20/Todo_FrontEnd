@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #46b8a2;
+  --color-brand-dark: #399b8b;
+  --color-brand-light: #f4f8f7;
+}
+
+@layer base {
+  body {
+    @apply font-sans;
+  }
+}
+
+.geometric-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.geometric-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #46b8a2 0%, #399b8b 100%);
+  z-index: -1;
+}
+
+.triangle {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  opacity: 0.1;
+}
+
+.triangle-1 {
+  border-width: 0 100px 100px 100px;
+  border-color: transparent transparent #ffffff transparent;
+  bottom: 10%;
+  right: -50px;
+  rotate: 45deg;
+}
+
+.triangle-2 {
+  border-width: 0 80px 80px 80px;
+  border-color: transparent transparent #ffffff transparent;
+  top: 20%;
+  left: 20%;
+  rotate: -15deg;
+}
+
+.square {
+  position: absolute;
+  background-color: #ffffff;
+  opacity: 0.1;
+}
+
+.square-1 {
+  width: 60px;
+  height: 60px;
+  top: 10%;
+  right: 20%;
+  rotate: 20deg;
+}
+
+.circle {
+  position: absolute;
+  background-color: #ffffff;
+  border-radius: 50%;
+  opacity: 0.05;
+}
+
+.circle-1 {
+  width: 150px;
+  height: 150px;
+  bottom: 20%;
+  left: 10%;
+}
