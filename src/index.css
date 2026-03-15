@@ -8,8 +8,69 @@
 
 @layer base {
   body {
-    @apply font-sans;
+    @apply font-sans m-0 p-0 overflow-hidden;
   }
+}
+
+.auth-container {
+  @apply relative h-screen w-full overflow-hidden bg-white;
+}
+
+.form-container {
+  @apply absolute top-0 h-full transition-all duration-700 ease-in-out;
+}
+
+.sign-in-container {
+  @apply left-0 z-20 w-1/2;
+}
+
+.auth-container.right-panel-active .sign-in-container {
+  @apply translate-x-full opacity-0;
+}
+
+.sign-up-container {
+  @apply left-0 z-10 w-1/2 opacity-0;
+}
+
+.auth-container.right-panel-active .sign-up-container {
+  @apply z-30 translate-x-full opacity-100;
+}
+
+.overlay-container {
+  @apply absolute top-0 left-1/2 z-50 h-full w-1/2 overflow-hidden transition-transform duration-700 ease-in-out;
+}
+
+.auth-container.right-panel-active .overlay-container {
+  @apply -translate-x-full;
+}
+
+.overlay {
+  @apply absolute left-[-100%] h-full w-[200%] translate-x-0 transition-transform duration-700 ease-in-out;
+  background: linear-gradient(135deg, #46b8a2 0%, #399b8b 100%);
+}
+
+.auth-container.right-panel-active .overlay {
+  @apply translate-x-1/2;
+}
+
+.overlay-panel {
+  @apply absolute top-0 flex h-full w-1/2 flex-col items-center justify-center text-center text-white transition-transform duration-700 ease-in-out;
+}
+
+.overlay-left {
+  @apply left-0 -translate-x-[20%];
+}
+
+.auth-container.right-panel-active .overlay-left {
+  @apply translate-x-0;
+}
+
+.overlay-right {
+  @apply right-0 translate-x-0;
+}
+
+.auth-container.right-panel-active .overlay-right {
+  @apply translate-x-[20%];
 }
 
 .geometric-bg {
@@ -17,65 +78,42 @@
   overflow: hidden;
 }
 
-.geometric-bg::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, #46b8a2 0%, #399b8b 100%);
-  z-index: -1;
-}
-
 .triangle {
-  position: absolute;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  opacity: 0.1;
+  @apply absolute h-0 w-0 border-solid opacity-10;
 }
 
 .triangle-1 {
-  border-width: 0 100px 100px 100px;
+  border-width: 0 150px 150px 150px;
   border-color: transparent transparent #ffffff transparent;
-  bottom: 10%;
+  bottom: -50px;
   right: -50px;
-  rotate: 45deg;
+  rotate: 35deg;
 }
 
 .triangle-2 {
-  border-width: 0 80px 80px 80px;
+  border-width: 0 120px 120px 120px;
   border-color: transparent transparent #ffffff transparent;
-  top: 20%;
-  left: 20%;
-  rotate: -15deg;
+  top: 10%;
+  left: 10%;
+  rotate: -20deg;
 }
 
 .square {
-  position: absolute;
-  background-color: #ffffff;
-  opacity: 0.1;
+  @apply absolute bg-white opacity-10;
 }
 
 .square-1 {
-  width: 60px;
-  height: 60px;
-  top: 10%;
-  right: 20%;
-  rotate: 20deg;
+  @apply h-[100px] w-[100px] rotate-[25deg];
+  top: 15%;
+  right: 15%;
 }
 
 .circle {
-  position: absolute;
-  background-color: #ffffff;
-  border-radius: 50%;
-  opacity: 0.05;
+  @apply absolute rounded-full bg-white opacity-[0.05];
 }
 
 .circle-1 {
-  width: 150px;
-  height: 150px;
-  bottom: 20%;
-  left: 10%;
+  @apply h-[250px] w-[250px];
+  bottom: 10%;
+  left: 5%;
 }
