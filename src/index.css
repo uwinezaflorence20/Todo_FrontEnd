@@ -17,7 +17,7 @@
 }
 
 .auth-box {
-  @apply relative w-[1100px] h-[650px] bg-white rounded-[40px] shadow-2xl overflow-hidden;
+  @apply relative w-full h-screen bg-white overflow-hidden;
 }
 
 .form-container {

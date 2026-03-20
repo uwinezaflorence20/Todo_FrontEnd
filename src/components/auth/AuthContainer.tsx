@@ -20,7 +20,7 @@ export const AuthContainer: React.FC = () => {
                   <path d="M12 2L2 7l10 5l10-5l-10-5zM2 17l10 5l10-5M2 12l10 5l10-5" />
                 </svg>
               </div>
-              <span className="text-xl font-bold text-gray-800">Diprella</span>
+              <span className="text-xl font-bold text-gray-800">Tick</span>
             </div>
 
             <h1 className="mb-6 text-5xl font-bold text-brand">Create Account</h1>
@@ -56,7 +56,7 @@ export const AuthContainer: React.FC = () => {
                   <path d="M12 2L2 7l10 5l10-5l-10-5zM2 17l10 5l10-5M2 12l10 5l10-5" />
                 </svg>
               </div>
-              <span className="text-xl font-bold text-gray-800">Diprella</span>
+              <span className="text-xl font-bold text-gray-800">Tick</span>
             </div>
 
             <h1 className="mb-6 text-5xl font-bold text-brand">Sign in</h1>
