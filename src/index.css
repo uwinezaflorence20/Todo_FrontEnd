@@ -117,3 +117,40 @@
   bottom: 10%;
   left: 5%;
 }
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .sign-in-container, .sign-up-container {
+    @apply w-full;
+  }
+  
+  .auth-box.is-signup .sign-in-container {
+    @apply translate-x-[-100%] opacity-0;
+  }
+  
+  .sign-up-container {
+    @apply translate-x-full opacity-0;
+  }
+
+  .auth-box.is-signup .sign-up-container {
+    @apply translate-x-0 opacity-100 z-30;
+  }
+
+  .overlay-container {
+    @apply hidden;
+  }
+  
+  .mobile-toggle {
+    @apply block mt-8 font-bold text-brand;
+  }
+
+  .auth-box {
+    @apply bg-white;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-toggle {
+    @apply hidden;
+  }
+}
