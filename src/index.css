@@ -14,39 +14,67 @@
 
 .auth-container {
   @apply relative h-screen w-full flex items-center justify-center;
-  perspective: 2000px;
 }
 
-.auth-card {
-  @apply relative w-[1100px] h-[650px] transition-transform duration-1000 ease-in-out;
-  transform-style: preserve-3d;
+.auth-box {
+  @apply relative w-[1100px] h-[650px] bg-white rounded-[40px] shadow-2xl overflow-hidden;
 }
 
-.auth-card.flipped {
-  transform: rotateY(180deg);
+.form-container {
+  @apply absolute top-0 h-full transition-all duration-[800ms] ease-in-out;
 }
 
-.auth-side {
-  @apply absolute top-0 left-0 w-full h-full flex bg-white rounded-[40px] shadow-2xl overflow-hidden;
-  backface-visibility: hidden;
+.sign-in-container {
+  @apply left-0 w-1/2 z-20;
 }
 
-.auth-front {
-  z-index: 2;
+.auth-box.is-signup .sign-in-container {
+  @apply translate-x-full opacity-0;
 }
 
-.auth-back {
-  transform: rotateY(180deg);
-  z-index: 1;
+.sign-up-container {
+  @apply left-0 w-1/2 z-10 opacity-0;
 }
 
-.info-panel {
-  @apply flex-[0.8] flex flex-col items-center justify-center text-center text-white p-12 relative overflow-hidden;
+.auth-box.is-signup .sign-up-container {
+  @apply translate-x-full opacity-100 z-30;
+}
+
+.overlay-container {
+  @apply absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-transform duration-[800ms] ease-in-out z-[100];
+}
+
+.auth-box.is-signup .overlay-container {
+  @apply -translate-x-full;
+}
+
+.overlay {
+  @apply relative left-[-100%] h-full w-[200%] transition-transform duration-[800ms] ease-in-out;
   background: linear-gradient(135deg, #46b8a2 0%, #399b8b 100%);
 }
 
-.form-panel {
-  @apply flex-[1.2] flex flex-col items-center justify-center bg-white p-12;
+.auth-box.is-signup .overlay {
+  @apply translate-x-1/2;
+}
+
+.overlay-panel {
+  @apply absolute top-0 flex h-full w-1/2 flex-col items-center justify-center text-center text-white p-12 transition-transform duration-[800ms] ease-in-out;
+}
+
+.overlay-left {
+  @apply translate-x-[-20%];
+}
+
+.auth-box.is-signup .overlay-left {
+  @apply translate-x-0;
+}
+
+.overlay-right {
+  @apply right-0 translate-x-0;
+}
+
+.auth-box.is-signup .overlay-right {
+  @apply translate-x-[20%];
 }
 
 .geometric-bg {
