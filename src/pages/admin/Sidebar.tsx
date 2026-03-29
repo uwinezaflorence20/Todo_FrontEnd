@@ -1,4 +1,5 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   FolderKanban, 
@@ -11,13 +12,13 @@ import {
 } from 'lucide-react';
 
 const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', active: true },
-  { icon: Users, label: 'User Management' },
-  { icon: FolderKanban, label: 'Global Projects' },
-  { icon: LayoutDashboard, label: 'System Logs' },
-  { icon: PieChart, label: 'App Analytics' },
-  { icon: MessageSquare, label: 'Support Tickets' },
-  { icon: Settings, label: 'System Settings' },
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/admin/dashboard' },
+  { icon: Users, label: 'User Management', path: '/admin/users' },
+  { icon: FolderKanban, label: 'Global Projects', path: '/admin/projects' },
+  { icon: LayoutDashboard, label: 'System Logs', path: '/admin/logs' },
+  { icon: PieChart, label: 'App Analytics', path: '/admin/analytics' },
+  { icon: MessageSquare, label: 'Support Tickets', path: '/admin/support' },
+  { icon: Settings, label: 'System Settings', path: '/admin/settings' },
 ];
 
 export const Sidebar: React.FC = () => {
@@ -34,21 +35,25 @@ export const Sidebar: React.FC = () => {
 
       <nav className="flex-1 overflow-y-auto w-full px-4 space-y-1">
         {navItems.map((item, index) => (
-          <a
+          <NavLink
             key={index}
-            href="#"
-            className={`flex items-center justify-between px-4 py-3 rounded-xl transition-colors ${
-              item.active 
+            to={item.path}
+            className={({ isActive }) => `flex items-center justify-between px-4 py-3 rounded-xl transition-colors ${
+              isActive 
                 ? 'bg-white text-[#0ec277] font-bold shadow-sm' 
                 : 'text-white hover:bg-white/10'
             }`}
           >
-            <div className="flex items-center gap-3">
-              <item.icon className={`w-5 h-5 ${item.active ? 'text-[#0ec277]' : 'opacity-80'}`} />
-              <span className="text-sm">{item.label}</span>
-            </div>
-            {!item.active && <ChevronRight className="w-4 h-4 opacity-50" />}
-          </a>
+            {({ isActive }) => (
+              <>
+                <div className="flex items-center gap-3">
+                  <item.icon className={`w-5 h-5 ${isActive ? 'text-[#0ec277]' : 'opacity-80'}`} />
+                  <span className="text-sm">{item.label}</span>
+                </div>
+                {!isActive && <ChevronRight className="w-4 h-4 opacity-50" />}
+              </>
+            )}
+          </NavLink>
         ))}
       </nav>
     </div>
