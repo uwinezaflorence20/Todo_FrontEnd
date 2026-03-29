@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ForgotPassword } from './ForgotPassword';
 
 const GoogleIcon = () => (
@@ -11,6 +12,7 @@ const GoogleIcon = () => (
 );
 
 export const AuthContainer: React.FC = () => {
+  const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
 
@@ -66,8 +68,8 @@ export const AuthContainer: React.FC = () => {
 
       // Automatically switch to sign in view on success
       toggleForm();
-    } catch (err: any) {
-      setSignupError(err.message || 'An unexpected error occurred');
+    } catch (err) {
+      setSignupError(err instanceof Error ? err.message : 'An unexpected error occurred');
     } finally {
       setIsSigningUp(false);
     }
@@ -96,13 +98,19 @@ export const AuthContainer: React.FC = () => {
         throw new Error(errorData.message || 'Signin failed');
       }
 
-      // Handle successful sign in (could store token, redirect to dashboard, etc.)
+      // Handle successful sign in
       const data = await response.json();
       console.log('Signin successful', data);
-      // For now we'll just show an alert until Dashboard routing is added
-      alert('Sign in successful!');
-    } catch (err: any) {
-      setSigninError(err.message || 'An unexpected error occurred');
+      
+      // Navigate based on role or default to admin dashboard for demonstration purposes
+      if (data.role === 'ADMIN' || signinEmail === 'admin@gmail.com') {
+        navigate('/admin/dashboard');
+      } else {
+        // Fallback or user dashboard logic
+        navigate('/admin/dashboard'); // defaulting to dashboard as requested by the prompt
+      }
+    } catch (err) {
+      setSigninError(err instanceof Error ? err.message : 'An unexpected error occurred');
     } finally {
       setIsSigningIn(false);
     }
