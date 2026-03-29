@@ -32,11 +32,11 @@ export const Topbar: React.FC = () => {
         <div className="flex items-center gap-3 cursor-pointer pl-2 border-l border-gray-200">
           <img 
             src="https://images.unsplash.com/photo-1594824436951-b8efc8fb4032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" 
-            alt="Dr. Monica" 
+            alt="Admin" 
             className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
           />
           <div className="flex items-center gap-1">
-            <span className="text-sm font-semibold text-gray-800">Dr. Monica</span>
+            <span className="text-sm font-semibold text-gray-800">Admin</span>
             <ChevronDown className="w-4 h-4 text-gray-500" />
           </div>
         </div>

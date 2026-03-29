@@ -5,7 +5,7 @@ import { Topbar } from './Topbar';
 import { StatCard } from './StatCard';
 import { HospitalSurveyChart } from './HospitalSurveyChart';
 import { CalendarWidget } from './CalendarWidget';
-import { CalendarCheck, Users, Stethoscope, Scissors, Building2, Banknote } from 'lucide-react';
+import { Users, Server, Activity, AlertCircle, Database, ShieldAlert } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
   return (
@@ -16,18 +16,17 @@ export const AdminDashboard: React.FC = () => {
           {/* Welcome Card */}
           <div className="bg-white rounded-[1.5rem] p-8 shadow-sm border border-gray-100/50 xl:col-span-1 flex flex-col justify-center relative overflow-hidden h-full min-h-[160px]">
             <div className="z-10 relative h-full flex flex-col justify-center">
-              <h2 className="text-[#0ec277] font-bold text-lg mb-1">Today Available</h2>
-              <p className="text-gray-500 text-xs font-semibold mb-4">From: Fortis Hospital</p>
+              <h2 className="text-[#0ec277] font-bold text-lg mb-1">System Status</h2>
+              <p className="text-gray-500 text-xs font-semibold mb-4">All services operational</p>
               
               <div className="flex items-center gap-4">
-                <img 
-                  src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" 
-                  alt="Dr. Daisy Leen" 
-                  className="w-16 h-16 rounded-full object-cover border-4 border-white shadow-md z-10"
-                />
+                <div className="w-16 h-16 rounded-full bg-green-100 text-[#0ec277] border-4 border-white shadow-md z-10 flex items-center justify-center font-bold text-xl">
+                  {/* We can use an icon or just text, let's use text for now */}
+                  OK
+                </div>
                 <div>
-                  <h3 className="text-gray-800 font-extrabold text-sm">Dr. Daisy Leen</h3>
-                  <p className="text-gray-400 font-medium text-[10px]">Orthopedist 11:00AM-03:00PM</p>
+                  <h3 className="text-gray-800 font-extrabold text-sm">Server Latency</h3>
+                  <p className="text-gray-400 font-medium text-[10px]">Current: 45ms (Healthy)</p>
                 </div>
               </div>
             </div>
@@ -36,40 +35,40 @@ export const AdminDashboard: React.FC = () => {
           {/* Stat Cards Grid */}
           <div className="xl:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <StatCard 
-              title="Appointments" 
-              value="40" 
-              subtitle="Yesterday 32 Appointments" 
-              icon={<CalendarCheck className="w-6 h-6" />} 
-            />
-            <StatCard 
-              title="New Admit" 
-              value="21" 
-              subtitle="Yesterday 18 Admits" 
+              title="Total Users" 
+              value="12,450" 
+              subtitle="+14% this month" 
               icon={<Users className="w-6 h-6" />} 
             />
             <StatCard 
-              title="Operations" 
-              value="14" 
-              subtitle="Yesterday 9 Operations" 
-              icon={<Scissors className="w-6 h-6" />} 
+              title="Active Sessions" 
+              value="842" 
+              subtitle="Right now" 
+              icon={<Activity className="w-6 h-6" />} 
             />
             <StatCard 
-              title="Doctors" 
-              value="15" 
-              subtitle="Today Available" 
-              icon={<Stethoscope className="w-6 h-6" />} 
+              title="Global Tasks" 
+              value="1.2M" 
+              subtitle="Across all workspaces" 
+              icon={<Database className="w-6 h-6" />} 
             />
             <StatCard 
-              title="Nurses" 
-              value="36" 
-              subtitle="Today Available" 
-              icon={<Building2 className="w-6 h-6" />} 
+              title="Server Errors" 
+              value="3" 
+              subtitle="Requires attention" 
+              icon={<AlertCircle className="w-6 h-6" />} 
             />
             <StatCard 
-              title="Earnings" 
-              value="$52,140" 
-              subtitle="Yesterday's $14,876" 
-              icon={<Banknote className="w-6 h-6" />} 
+              title="Storage Used" 
+              value="45TB" 
+              subtitle="62% capacity" 
+              icon={<Server className="w-6 h-6" />} 
+            />
+            <StatCard 
+              title="Security Alerts" 
+              value="0" 
+              subtitle="System secure" 
+              icon={<ShieldAlert className="w-6 h-6" />} 
             />
           </div>
         </div>

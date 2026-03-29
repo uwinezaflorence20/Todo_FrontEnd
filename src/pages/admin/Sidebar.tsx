@@ -1,42 +1,35 @@
 import React from 'react';
 import { 
   LayoutDashboard, 
-  CalendarCheck, 
-  Users, 
-  UserPlus, 
+  FolderKanban, 
   Settings, 
-  FileText,
-  Building2,
-  Stethoscope,
-  HeartPulse,
+  PieChart,
+  Users,
   MessageSquare,
+  CheckCircle,
   ChevronRight
 } from 'lucide-react';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', active: true },
-  { icon: CalendarCheck, label: 'Appointments' },
-  { icon: Stethoscope, label: 'Doctors' },
-  { icon: Users, label: 'Patients' },
-  { icon: Building2, label: 'Room Allotments' },
-  { icon: FileText, label: 'Payments' },
-  { icon: Settings, label: 'Expenses Report' },
-  { icon: UserPlus, label: 'Departments' },
-  { icon: HeartPulse, label: 'Insurance Company' },
-  { icon: CalendarCheck, label: 'Events' },
-  { icon: MessageSquare, label: 'Chat' },
+  { icon: Users, label: 'User Management' },
+  { icon: FolderKanban, label: 'Global Projects' },
+  { icon: LayoutDashboard, label: 'System Logs' },
+  { icon: PieChart, label: 'App Analytics' },
+  { icon: MessageSquare, label: 'Support Tickets' },
+  { icon: Settings, label: 'System Settings' },
 ];
 
 export const Sidebar: React.FC = () => {
   return (
     <div className="py-8 flex flex-col h-full">
       <div className="px-8 mb-10 flex items-center gap-2">
-        <HeartPulse className="w-8 h-8 font-bold" />
-        <span className="text-2xl font-bold tracking-wider">MEDILINE-</span>
+        <CheckCircle className="w-8 h-8 font-bold" />
+        <span className="text-2xl font-bold tracking-wider">TICK.DO</span>
       </div>
 
       <div className="px-6 mb-4 text-sm font-semibold opacity-80">
-        Hospital
+        Workspace
       </div>
 
       <nav className="flex-1 overflow-y-auto w-full px-4 space-y-1">
