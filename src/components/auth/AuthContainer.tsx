@@ -102,6 +102,11 @@ export const AuthContainer: React.FC = () => {
       const data = await response.json();
       console.log('Signin successful', data);
       
+      const token = data.token || data.accessToken || data.jwt || data.id_token;
+      if (token) {
+        localStorage.setItem('token', token);
+      }
+      
       // Navigate based on role or default to admin dashboard for demonstration purposes
       if (data.role === 'ADMIN' || signinEmail === 'admin@gmail.com') {
         navigate('/admin/dashboard');
