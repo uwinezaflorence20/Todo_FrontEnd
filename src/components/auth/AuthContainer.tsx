@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { CheckCircle } from 'lucide-react';
 import { ForgotPassword } from './ForgotPassword';
 
 const GoogleIcon = () => (
@@ -129,13 +130,9 @@ export const AuthContainer: React.FC = () => {
         {/* Sign Up Form Container */}
         <div className="form-container sign-up-container">
           <form action="#" className="flex h-full w-full flex-col items-center justify-center bg-white p-12 text-center" onSubmit={handleSignUp}>
-            <div className="absolute top-10 left-10 flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-brand p-1">
-                <svg viewBox="0 0 24 24" className="fill-brand h-6 w-6">
-                  <path d="M12 2L2 7l10 5l10-5l-10-5zM2 17l10 5l10-5M2 12l10 5l10-5" />
-                </svg>
-              </div>
-              <span className="text-xl font-bold text-gray-800">Tick</span>
+            <div className="absolute top-10 left-10 flex items-center gap-2 text-brand">
+              <CheckCircle className="w-8 h-8 font-bold" />
+              <span className="text-2xl font-bold tracking-wider">TICK.DO</span>
             </div>
 
             <h1 className="mb-6 text-5xl font-bold text-brand">Create Account</h1>
@@ -192,13 +189,9 @@ export const AuthContainer: React.FC = () => {
             <ForgotPassword onBack={() => setIsForgotPassword(false)} />
           ) : (
             <form action="#" className="flex h-full w-full flex-col items-center justify-center bg-white p-12 text-center" onSubmit={handleSignIn}>
-              <div className="absolute top-10 left-10 flex items-center gap-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-brand p-1">
-                  <svg viewBox="0 0 24 24" className="fill-brand h-6 w-6">
-                    <path d="M12 2L2 7l10 5l10-5l-10-5zM2 17l10 5l10-5M2 12l10 5l10-5" />
-                  </svg>
-                </div>
-                <span className="text-xl font-bold text-gray-800">Tick</span>
+              <div className="absolute top-10 left-10 flex items-center gap-2 text-brand">
+                <CheckCircle className="w-8 h-8 font-bold" />
+                <span className="text-2xl font-bold tracking-wider">TICK.DO</span>
               </div>
 
               <h1 className="mb-6 text-5xl font-bold text-brand">Sign in</h1>

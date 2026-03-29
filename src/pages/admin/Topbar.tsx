@@ -1,7 +1,15 @@
 import React from 'react';
-import { Search, Bell, ChevronDown } from 'lucide-react';
+import { Search, Bell, ChevronDown, LogOut, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export const Topbar: React.FC = () => {
+  const navigate = useNavigate();
+  const [showProfileMenu, setShowProfileMenu] = React.useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/');
+  };
   return (
     <div className="flex items-center justify-between bg-white/50 backdrop-blur-sm px-6 py-4 rounded-2xl w-full">
       {/* Search Bar */}
@@ -29,16 +37,36 @@ export const Topbar: React.FC = () => {
         </div>
 
         {/* Profile */}
-        <div className="flex items-center gap-3 cursor-pointer pl-2 border-l border-gray-200">
-          <img 
-            src="https://images.unsplash.com/photo-1594824436951-b8efc8fb4032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" 
-            alt="Admin" 
-            className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
-          />
-          <div className="flex items-center gap-1">
-            <span className="text-sm font-semibold text-gray-800">Admin</span>
-            <ChevronDown className="w-4 h-4 text-gray-500" />
+        <div className="relative border-l border-gray-200 pl-4">
+          <div 
+            className="flex items-center gap-3 cursor-pointer group"
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+          >
+            <div className="w-10 h-10 rounded-full bg-brand/10 text-brand flex items-center justify-center border-2 border-white shadow-sm transition-transform group-hover:scale-105">
+              <User className="w-6 h-6" />
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-sm font-semibold text-gray-800">Admin</span>
+              <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showProfileMenu ? 'rotate-180' : ''}`} />
+            </div>
           </div>
+
+          {/* Profile Dropdown */}
+          {showProfileMenu && (
+            <div className="absolute right-0 mt-3 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="px-4 py-2 border-b border-gray-50 mb-1">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Account</p>
+                <p className="text-sm font-bold text-gray-800 truncate">admin@gmail.com</p>
+              </div>
+              <button 
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors font-semibold"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

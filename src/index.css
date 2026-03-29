@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand: #46b8a2;
-  --color-brand-dark: #399b8b;
-  --color-brand-light: #f4f8f7;
+  --color-brand: #0ec277;
+  --color-brand-dark: #0ba364;
+  --color-brand-light: #f0fdf4;
 }
 
 @layer base {
@@ -50,7 +50,7 @@
 
 .overlay {
   @apply relative left-[-100%] h-full w-[200%] transition-transform duration-[800ms] ease-in-out;
-  background: linear-gradient(135deg, #46b8a2 0%, #399b8b 100%);
+  background: linear-gradient(135deg, #0ec277 0%, #0ba364 100%);
 }
 
 .auth-box.is-signup .overlay {
