@@ -9,12 +9,14 @@ import { SupportTickets } from './pages/admin/SupportTickets';
 import { SystemSettings } from './pages/admin/SystemSettings';
 import { ToastProvider } from './components/ui/Toast';
 import { UserDashboard } from './pages/user/UserDashboard';
+import { AuthProvider } from './context/AuthContext';
 
 function App() {
   return (
-    <ToastProvider>
-      <Router>
-        <Routes>
+    <AuthProvider>
+      <ToastProvider>
+        <Router>
+          <Routes>
           <Route path="/" element={<AuthContainer />} />
           <Route path="/dashboard" element={<UserDashboard />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
@@ -28,7 +30,8 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
-    </ToastProvider>
+      </ToastProvider>
+    </AuthProvider>
   );
 }
 

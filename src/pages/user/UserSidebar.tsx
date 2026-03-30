@@ -17,7 +17,7 @@ import {
 const navItems = [
   { icon: LayoutGrid, label: 'Boards', path: '/boards' },
   { icon: Calendar, label: 'Plan Schedule', path: '/schedule' },
-  { icon: BarChart3, label: 'Reporting', path: '/dashboard' },
+  { icon: BarChart3, label: 'Tasks', path: '/dashboard' },
   { icon: MessageSquare, label: 'Messages', path: '/messages' },
   { icon: Users2, label: 'Team Member', path: '/team' },
   { icon: ToyBrick, label: 'Tools Plugin', path: '/plugins' },

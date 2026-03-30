@@ -17,21 +17,21 @@ import {
 } from 'lucide-react';
 
 const tasks = [
-  { id: 1, title: 'App Development', category: 'Marketing Team', timeLeft: '1 Weeks', progress: 34, icon: Monitor, iconBgColor: '#ec4899', status: 'Started' },
-  { id: 2, title: 'Web Design', category: 'Core UI Team', timeLeft: '3 Weeks', progress: 76, icon: Palette, iconBgColor: '#0ec277', status: 'Completed' },
-  { id: 3, title: 'Landing Page', category: 'Marketing Team', timeLeft: '2 Days', progress: 4, icon: Layout, iconBgColor: '#3b82f6', status: 'Started' },
-  { id: 4, title: 'Business Compare', category: 'Marketing Team', timeLeft: '1 Month', progress: 90, icon: BarChart, iconBgColor: '#f97316', status: 'Approval' },
-  { id: 5, title: 'Commerce Checkout', category: 'Order Process Team', timeLeft: '3 Weeks', progress: 65, icon: ShoppingCart, iconBgColor: '#8b5cf6', status: 'Started' },
-  { id: 6, title: 'Data Staging', category: 'Core Data Team', timeLeft: '2 Month', progress: 96, icon: Database, iconBgColor: '#f59e0b', status: 'Completed' },
-  { id: 7, title: 'Campaign Store', category: 'Internal Communication', timeLeft: '11 Days', progress: 24, icon: Video, iconBgColor: '#06b6d4', status: 'Started' },
-  { id: 8, title: 'Acquisition Mitra', category: 'Merchant team', timeLeft: '1 Weeks', progress: 70, icon: Target, iconBgColor: '#db2777', status: 'Approval' },
+  { id: 1, title: 'Finalize Design System', category: 'Work', timeLeft: '1 Weeks', progress: 34, icon: Monitor, iconBgColor: '#ec4899', status: 'Doing' },
+  { id: 2, title: 'Grocery Shopping', category: 'Personal', timeLeft: '3 Hours', progress: 100, icon: ShoppingCart, iconBgColor: '#0ec277', status: 'Done' },
+  { id: 3, title: 'Update Documentation', category: 'Work', timeLeft: '2 Days', progress: 4, icon: Layout, iconBgColor: '#3b82f6', status: 'Pending' },
+  { id: 4, title: 'Client Meeting', category: 'Work', timeLeft: '1 Hour', progress: 0, icon: BarChart, iconBgColor: '#f97316', status: 'Pending' },
+  { id: 5, title: 'Pay Electricity Bill', category: 'Personal', timeLeft: '3 Weeks', progress: 65, icon: Database, iconBgColor: '#8b5cf6', status: 'Doing' },
+  { id: 6, title: 'Bug Fixes', category: 'Work', timeLeft: '2 Days', progress: 100, icon: Video, iconBgColor: '#f59e0b', status: 'Done' },
+  { id: 7, title: 'Exercise', category: 'Health', timeLeft: '11 Days', progress: 24, icon: Target, iconBgColor: '#06b6d4', status: 'Doing' },
+  { id: 8, title: 'Read Book', category: 'Personal', timeLeft: '1 Weeks', progress: 70, icon: Palette, iconBgColor: '#db2777', status: 'Doing' },
 ];
 
 const filters = [
   { label: 'All', count: 50 },
-  { label: 'Started', count: 20 },
-  { label: 'Approval', count: 18 },
-  { label: 'Completed', count: 34 },
+  { label: 'Pending', count: 20 },
+  { label: 'Doing', count: 18 },
+  { label: 'Done', count: 34 },
 ];
 
 export const UserDashboard: React.FC = () => {
@@ -47,8 +47,8 @@ export const UserDashboard: React.FC = () => {
                 {/* Header Section */}
                 <div className="flex items-end justify-between">
                     <div>
-                        <h1 className="text-4xl font-extrabold text-gray-800 mb-2">Reporting</h1>
-                        <p className="text-gray-400 font-bold text-sm tracking-wide opacity-70">All project in current month</p>
+                        <h1 className="text-4xl font-extrabold text-gray-800 mb-2">Todo List</h1>
+                        <p className="text-gray-400 font-bold text-sm tracking-wide opacity-70">Your personal tasks for today</p>
                     </div>
 
                     <div className="flex items-center gap-4">

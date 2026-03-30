@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
 import { ForgotPassword } from './ForgotPassword';
 import { useToast } from '../ui/Toast';
+import { useAuth } from '../../context/AuthContext';
 
 const GoogleIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="w-6 h-6">
@@ -16,6 +17,7 @@ const GoogleIcon = () => (
 export const AuthContainer: React.FC = () => {
   const navigate = useNavigate();
   const { success, error } = useToast();
+  const { login } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
 
@@ -110,7 +112,11 @@ export const AuthContainer: React.FC = () => {
       
       const token = data.token || data.accessToken || data.jwt || data.id_token;
       if (token) {
-        localStorage.setItem('token', token);
+        login(token, {
+          email: signinEmail,
+          name: data.username || signinEmail.split('@')[0],
+          role: data.role || (signinEmail === 'admin@gmail.com' ? 'ADMIN' : 'USER')
+        });
       }
       
       success('Welcome Back!', 'You have successfully signed in.');
