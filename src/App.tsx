@@ -7,23 +7,30 @@ import { SystemLogs } from './pages/admin/SystemLogs';
 import { AppAnalytics } from './pages/admin/AppAnalytics';
 import { SupportTickets } from './pages/admin/SupportTickets';
 import { SystemSettings } from './pages/admin/SystemSettings';
+import { ToastProvider } from './components/ui/Toast';
+import { UserDashboard } from './pages/user/UserDashboard';
+
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<AuthContainer />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/users" element={<UserManagement />} />
-        <Route path="/admin/projects" element={<GlobalProjects />} />
-        <Route path="/admin/logs" element={<SystemLogs />} />
-        <Route path="/admin/analytics" element={<AppAnalytics />} />
-        <Route path="/admin/support" element={<SupportTickets />} />
-        <Route path="/admin/settings" element={<SystemSettings />} />
-        {/* Fallback route */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+    <ToastProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<AuthContainer />} />
+          <Route path="/dashboard" element={<UserDashboard />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/users" element={<UserManagement />} />
+          <Route path="/admin/projects" element={<GlobalProjects />} />
+          <Route path="/admin/logs" element={<SystemLogs />} />
+          <Route path="/admin/analytics" element={<AppAnalytics />} />
+          <Route path="/admin/support" element={<SupportTickets />} />
+          <Route path="/admin/settings" element={<SystemSettings />} />
+          {/* Fallback route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </ToastProvider>
   );
 }
 
 export default App;
+

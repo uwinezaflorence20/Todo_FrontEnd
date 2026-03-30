@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useToast } from '../ui/Toast';
 
 interface ForgotPasswordProps {
   onBack: () => void;
 }
 
 export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBack }) => {
+  const { success } = useToast();
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -12,6 +14,7 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBack }) => {
     e.preventDefault();
     // Simulate API call
     console.log('Reset password for email:', email);
+    success('Reset Link Sent', `A recovery link has been sent to ${email}`);
     setIsSubmitted(true);
   };
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { CheckCircle, XCircle, X } from 'lucide-react';
 
 export type ToastType = 'success' | 'error';
@@ -9,6 +9,48 @@ export interface ToastMessage {
   title: string;
   message: string;
 }
+
+interface ToastContextType {
+  success: (title: string, message: string) => void;
+  error: (title: string, message: string) => void;
+  removeToast: (id: number) => void;
+  toasts: ToastMessage[];
+}
+
+const ToastContext = createContext<ToastContextType | undefined>(undefined);
+
+export const useToast = () => {
+  const context = useContext(ToastContext);
+  if (!context) {
+    throw new Error('useToast must be used within a ToastProvider');
+  }
+  return context;
+};
+
+let toastCounter = 0;
+
+export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  const removeToast = useCallback((id: number) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  const addToast = useCallback((type: ToastType, title: string, message: string) => {
+    const id = ++toastCounter;
+    setToasts((prev) => [...prev, { id, type, title, message }]);
+  }, []);
+
+  const success = useCallback((title: string, message: string) => addToast('success', title, message), [addToast]);
+  const error = useCallback((title: string, message: string) => addToast('error', title, message), [addToast]);
+
+  return (
+    <ToastContext.Provider value={{ success, error, removeToast, toasts }}>
+      {children}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+    </ToastContext.Provider>
+  );
+};
 
 interface ToastItemProps {
   toast: ToastMessage;
@@ -61,9 +103,10 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
         maxWidth: '420px',
         position: 'relative',
         overflow: 'hidden',
+        pointerEvents: 'auto',
+        marginBottom: '8px'
       }}
     >
-      {/* Shimmer accent */}
       <div
         style={{
           position: 'absolute',
@@ -76,7 +119,6 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
         }}
       />
 
-      {/* Icon */}
       <div
         style={{
           flexShrink: 0,
@@ -97,7 +139,6 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
         )}
       </div>
 
-      {/* Content */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <p
           style={{
@@ -123,7 +164,6 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
         </p>
       </div>
 
-      {/* Close button */}
       <button
         onClick={handleClose}
         style={{
@@ -141,13 +181,10 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
           transition: 'background 0.2s',
           marginTop: '2px',
         }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.3)')}
-        onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.15)')}
       >
         <X className="w-4 h-4" />
       </button>
 
-      {/* Progress bar */}
       <div
         style={{
           position: 'absolute',
@@ -163,12 +200,7 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
   );
 };
 
-interface ToastContainerProps {
-  toasts: ToastMessage[];
-  onRemove: (id: number) => void;
-}
-
-export const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, onRemove }) => {
+const ToastContainer: React.FC<{ toasts: ToastMessage[]; onRemove: (id: number) => void }> = ({ toasts, onRemove }) => {
   return (
     <div
       style={{
@@ -178,36 +210,13 @@ export const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, onRemove
         zIndex: 9999,
         display: 'flex',
         flexDirection: 'column',
-        gap: '12px',
         pointerEvents: 'none',
       }}
     >
       {toasts.map((toast) => (
-        <div key={toast.id} style={{ pointerEvents: 'auto' }}>
-          <ToastItem toast={toast} onRemove={onRemove} />
-        </div>
+        <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
       ))}
     </div>
   );
 };
 
-// Hook for managing toasts
-let toastCounter = 0;
-
-export const useToast = () => {
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
-
-  const addToast = (type: ToastType, title: string, message: string) => {
-    const id = ++toastCounter;
-    setToasts((prev) => [...prev, { id, type, title, message }]);
-  };
-
-  const removeToast = (id: number) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
-
-  const success = (title: string, message: string) => addToast('success', title, message);
-  const error = (title: string, message: string) => addToast('error', title, message);
-
-  return { toasts, removeToast, success, error };
-};

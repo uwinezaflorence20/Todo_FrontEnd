@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
 import { ForgotPassword } from './ForgotPassword';
+import { useToast } from '../ui/Toast';
 
 const GoogleIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="w-6 h-6">
@@ -14,6 +15,7 @@ const GoogleIcon = () => (
 
 export const AuthContainer: React.FC = () => {
   const navigate = useNavigate();
+  const { success, error } = useToast();
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
 
@@ -68,9 +70,12 @@ export const AuthContainer: React.FC = () => {
       }
 
       // Automatically switch to sign in view on success
+      success('Account Created', 'Your account has been created successfully. Please sign in.');
       toggleForm();
     } catch (err) {
-      setSignupError(err instanceof Error ? err.message : 'An unexpected error occurred');
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setSignupError(errorMessage);
+      error('Signup Failed', errorMessage);
     } finally {
       setIsSigningUp(false);
     }
@@ -108,15 +113,19 @@ export const AuthContainer: React.FC = () => {
         localStorage.setItem('token', token);
       }
       
+      success('Welcome Back!', 'You have successfully signed in.');
+
       // Navigate based on role or default to admin dashboard for demonstration purposes
       if (data.role === 'ADMIN' || signinEmail === 'admin@gmail.com') {
         navigate('/admin/dashboard');
       } else {
-        // Fallback or user dashboard logic
-        navigate('/admin/dashboard'); // defaulting to dashboard as requested by the prompt
+        // Normal user dashboard
+        navigate('/dashboard');
       }
     } catch (err) {
-      setSigninError(err instanceof Error ? err.message : 'An unexpected error occurred');
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setSigninError(errorMessage);
+      error('Signin Failed', errorMessage);
     } finally {
       setIsSigningIn(false);
     }
