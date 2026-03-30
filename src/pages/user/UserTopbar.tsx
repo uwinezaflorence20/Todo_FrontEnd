@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Bell, ChevronDown, User, Plus } from 'lucide-react';
+import { Search, Bell, ChevronDown, Plus } from 'lucide-react';
 import { useToast } from '../../components/ui/Toast';
 import { useAuth } from '../../context/AuthContext';
 
