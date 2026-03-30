@@ -10,6 +10,16 @@ import { SystemSettings } from './pages/admin/SystemSettings';
 import { ToastProvider } from './components/ui/Toast';
 import { UserDashboard } from './pages/user/UserDashboard';
 import { AuthProvider } from './context/AuthContext';
+import { UserPlaceholder } from './pages/user/UserPlaceholder';
+import { 
+  LayoutGrid, 
+  Calendar, 
+  MessageSquare, 
+  Users2, 
+  ToyBrick, 
+  Compass, 
+  Settings 
+} from 'lucide-react';
 
 function App() {
   return (
@@ -17,15 +27,6 @@ function App() {
       <ToastProvider>
         <Router>
           <Routes>
-          <Route path="/" element={<AuthContainer />} />
-          <Route path="/dashboard" element={<UserDashboard />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/users" element={<UserManagement />} />
-          <Route path="/admin/projects" element={<GlobalProjects />} />
-          <Route path="/admin/logs" element={<SystemLogs />} />
-          <Route path="/admin/analytics" element={<AppAnalytics />} />
-          <Route path="/admin/support" element={<SupportTickets />} />
-          <Route path="/admin/settings" element={<SystemSettings />} />
           {/* Fallback route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
