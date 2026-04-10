@@ -1,108 +1,318 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { UserLayout } from './UserLayout';
 import { UserSidebar } from './UserSidebar';
 import { UserTopbar } from './UserTopbar';
 import { TaskCard } from './TaskCard';
-import { 
-    Monitor, 
-    Palette, 
-    Layout, 
-    BarChart, 
-    ShoppingCart, 
-    Database, 
-    Video, 
-    Target,
-    Grid,
-    List
-} from 'lucide-react';
+import { TaskModal } from './TaskModal';
+import { useTasks } from '../../context/TaskContext';
+import { useToast } from '../../components/ui/Toast';
+import type { Task, TaskStatus, CreateTaskPayload } from '../../services/api';
+import { Grid, List, Loader2, Plus } from 'lucide-react';
 
-const tasks = [
-  { id: 1, title: 'Finalize Design System', category: 'Work', timeLeft: '1 Weeks', progress: 34, icon: Monitor, iconBgColor: '#ec4899', status: 'Doing' },
-  { id: 2, title: 'Grocery Shopping', category: 'Personal', timeLeft: '3 Hours', progress: 100, icon: ShoppingCart, iconBgColor: '#0ec277', status: 'Done' },
-  { id: 3, title: 'Update Documentation', category: 'Work', timeLeft: '2 Days', progress: 4, icon: Layout, iconBgColor: '#3b82f6', status: 'Pending' },
-  { id: 4, title: 'Client Meeting', category: 'Work', timeLeft: '1 Hour', progress: 0, icon: BarChart, iconBgColor: '#f97316', status: 'Pending' },
-  { id: 5, title: 'Pay Electricity Bill', category: 'Personal', timeLeft: '3 Weeks', progress: 65, icon: Database, iconBgColor: '#8b5cf6', status: 'Doing' },
-  { id: 6, title: 'Bug Fixes', category: 'Work', timeLeft: '2 Days', progress: 100, icon: Video, iconBgColor: '#f59e0b', status: 'Done' },
-  { id: 7, title: 'Exercise', category: 'Health', timeLeft: '11 Days', progress: 24, icon: Target, iconBgColor: '#06b6d4', status: 'Doing' },
-  { id: 8, title: 'Read Book', category: 'Personal', timeLeft: '1 Weeks', progress: 70, icon: Palette, iconBgColor: '#db2777', status: 'Doing' },
-];
+type ViewMode = 'grid' | 'list';
 
-const filters = [
-  { label: 'All', count: 50 },
-  { label: 'Pending', count: 20 },
-  { label: 'Doing', count: 18 },
-  { label: 'Done', count: 34 },
-];
+const STATUS_FILTERS: ('All' | TaskStatus)[] = ['All', 'Pending', 'Doing', 'Done'];
 
 export const UserDashboard: React.FC = () => {
-    const [activeFilter, setActiveFilter] = useState('All');
+  const { tasks, loading, error, fetchTasks, createTask, updateTask, deleteTask } = useTasks();
+  const { success, error: showError } = useToast();
 
-    const filteredTasks = activeFilter === 'All' 
-        ? tasks 
-        : tasks.filter(task => task.status === activeFilter);
+  const [activeFilter, setActiveFilter] = useState<'All' | TaskStatus>('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-    return (
-        <UserLayout sidebar={<UserSidebar />} topbar={<UserTopbar />}>
-            <div className="flex flex-col gap-10">
-                {/* Header Section */}
-                <div className="flex items-end justify-between">
-                    <div>
-                        <h1 className="text-4xl font-extrabold text-gray-800 mb-2">Todo List</h1>
-                        <p className="text-gray-400 font-bold text-sm tracking-wide opacity-70">Your personal tasks for today</p>
-                    </div>
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
 
-                    <div className="flex items-center gap-4">
-                        <button className="p-3 bg-white border border-gray-100 rounded-xl shadow-sm text-gray-400 hover:text-brand hover:border-brand/20 transition-all">
-                            <Grid className="w-5 h-5" />
-                        </button>
-                        <button className="p-3 bg-white border border-gray-100 rounded-xl shadow-sm text-gray-400 hover:text-brand hover:border-brand/20 transition-all">
-                            <List className="w-5 h-5" />
-                        </button>
-                        <button className="px-6 py-3 bg-white border border-gray-100 font-bold text-sm text-gray-600 rounded-xl shadow-sm hover:bg-gray-50 transition-all border-b-4 border-b-gray-200 active:border-b-0 active:translate-y-1">
-                            More Options
-                        </button>
-                    </div>
-                </div>
+  const filteredTasks = useMemo(() => {
+    let list = tasks;
+    if (activeFilter !== 'All') {
+      list = list.filter((t) => t.status === activeFilter);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(
+        (t) =>
+          t.title.toLowerCase().includes(q) ||
+          t.category.toLowerCase().includes(q) ||
+          (t.description ?? '').toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [tasks, activeFilter, searchQuery]);
 
-                {/* Filter Tabs */}
-                <div className="flex items-center gap-6">
-                    {filters.map((filter) => (
-                        <button 
-                            key={filter.label}
-                            onClick={() => setActiveFilter(filter.label)}
-                            className={`flex items-center gap-3 px-8 py-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${
-                                activeFilter === filter.label 
-                                    ? 'bg-brand text-white shadow-xl shadow-brand/20' 
-                                    : 'bg-white text-gray-400 hover:bg-gray-50 shadow-sm border border-transparent hover:border-gray-100'
-                            }`}
-                        >
-                            <span>{filter.label}</span>
-                            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black ${
-                                activeFilter === filter.label 
-                                    ? 'bg-white/20 text-white' 
-                                    : 'bg-brand/10 text-brand'
-                            }`}>
-                                {filter.count}
-                            </span>
-                        </button>
-                    ))}
-                </div>
+  const counts = useMemo(() => ({
+    All: tasks.length,
+    Pending: tasks.filter((t) => t.status === 'Pending').length,
+    Doing: tasks.filter((t) => t.status === 'Doing').length,
+    Done: tasks.filter((t) => t.status === 'Done').length,
+  }), [tasks]);
 
-                {/* Project Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                    {filteredTasks.map((task) => (
-                        <TaskCard 
-                            key={task.id}
-                            title={task.title}
-                            category={task.category}
-                            timeLeft={task.timeLeft}
-                            progress={task.progress}
-                            icon={task.icon}
-                            iconBgColor={task.iconBgColor}
-                        />
-                    ))}
-                </div>
+  const handleCreate = async (payload: CreateTaskPayload) => {
+    await createTask(payload);
+    success('Task Created', `"${payload.title}" has been added.`);
+  };
+
+  const handleEdit = async (payload: CreateTaskPayload) => {
+    if (!editingTask) return;
+    await updateTask(editingTask.id, payload);
+    success('Task Updated', `"${payload.title}" has been saved.`);
+    setEditingTask(null);
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await deleteTask(id);
+      success('Task Deleted', 'The task has been removed.');
+    } catch (err) {
+      showError('Delete Failed', err instanceof Error ? err.message : 'Could not delete task.');
+    }
+  };
+
+  const handleStatusChange = async (id: number, status: TaskStatus) => {
+    try {
+      const progress = status === 'Done' ? 100 : status === 'Pending' ? 0 : undefined;
+      await updateTask(id, { status, ...(progress !== undefined ? { progress } : {}) });
+      success('Status Updated', `Task moved to ${status}.`);
+    } catch (err) {
+      showError('Update Failed', err instanceof Error ? err.message : 'Could not update task.');
+    }
+  };
+
+  return (
+    <UserLayout
+      sidebar={<UserSidebar />}
+      topbar={
+        <UserTopbar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onAddTask={() => { setEditingTask(null); setModalOpen(true); }}
+        />
+      }
+    >
+      <div className="flex flex-col gap-8">
+        {/* Header */}
+        <div className="flex items-end justify-between">
+          <div>
+            <h1 className="text-4xl font-extrabold text-gray-800 mb-2">Todo List</h1>
+            <p className="text-gray-400 font-bold text-sm tracking-wide opacity-70">
+              {tasks.length} task{tasks.length !== 1 ? 's' : ''} total
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-3 rounded-xl border transition-all ${
+                viewMode === 'grid'
+                  ? 'bg-brand text-white border-brand shadow-lg shadow-brand/20'
+                  : 'bg-white border-gray-100 text-gray-400 hover:text-brand shadow-sm'
+              }`}
+            >
+              <Grid className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-3 rounded-xl border transition-all ${
+                viewMode === 'list'
+                  ? 'bg-brand text-white border-brand shadow-lg shadow-brand/20'
+                  : 'bg-white border-gray-100 text-gray-400 hover:text-brand shadow-sm'
+              }`}
+            >
+              <List className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => { setEditingTask(null); setModalOpen(true); }}
+              className="flex items-center gap-2 px-5 py-3 bg-brand text-white font-bold text-sm rounded-xl shadow-lg shadow-brand/20 hover:bg-brand-dark transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              Add Task
+            </button>
+          </div>
+        </div>
+
+        {/* Filter Tabs */}
+        <div className="flex items-center gap-3 flex-wrap">
+          {STATUS_FILTERS.map((filter) => (
+            <button
+              key={filter}
+              onClick={() => setActiveFilter(filter)}
+              className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl transition-all duration-300 font-bold text-sm ${
+                activeFilter === filter
+                  ? 'bg-brand text-white shadow-xl shadow-brand/20'
+                  : 'bg-white text-gray-400 hover:bg-gray-50 shadow-sm border border-transparent hover:border-gray-100'
+              }`}
+            >
+              <span>{filter}</span>
+              <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black ${
+                activeFilter === filter ? 'bg-white/20 text-white' : 'bg-brand/10 text-brand'
+              }`}>
+                {counts[filter]}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Loading */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-24 gap-4">
+            <Loader2 className="w-10 h-10 text-brand animate-spin" />
+            <p className="text-gray-400 font-bold text-sm">Loading your tasks...</p>
+          </div>
+        )}
+
+        {/* Error */}
+        {error && !loading && (
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <div className="bg-red-50 border border-red-100 rounded-2xl px-8 py-6 text-center max-w-md">
+              <p className="text-red-500 font-bold mb-4">{error}</p>
+              <button
+                onClick={fetchTasks}
+                className="px-6 py-2.5 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark transition-all text-sm"
+              >
+                Try Again
+              </button>
             </div>
-        </UserLayout>
-    );
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!loading && !error && filteredTasks.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
+            <div className="w-20 h-20 rounded-3xl bg-brand/10 flex items-center justify-center mb-2">
+              <Plus className="w-10 h-10 text-brand" />
+            </div>
+            <h3 className="text-xl font-black text-gray-700">
+              {searchQuery ? 'No tasks match your search' : 'No tasks yet'}
+            </h3>
+            <p className="text-gray-400 font-medium text-sm max-w-xs">
+              {searchQuery
+                ? 'Try a different keyword or clear the search.'
+                : 'Click "Add Task" to create your first task.'}
+            </p>
+            {!searchQuery && (
+              <button
+                onClick={() => { setEditingTask(null); setModalOpen(true); }}
+                className="mt-2 px-6 py-3 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark transition-all shadow-lg shadow-brand/20 text-sm"
+              >
+                Add Your First Task
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Task Grid or List */}
+        {!loading && !error && filteredTasks.length > 0 && (
+          viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredTasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onEdit={(t) => { setEditingTask(t); setModalOpen(true); }}
+                  onDelete={handleDelete}
+                  onStatusChange={handleStatusChange}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {filteredTasks.map((task) => (
+                <ListTaskRow
+                  key={task.id}
+                  task={task}
+                  onEdit={(t) => { setEditingTask(t); setModalOpen(true); }}
+                  onDelete={handleDelete}
+                  onStatusChange={handleStatusChange}
+                />
+              ))}
+            </div>
+          )
+        )}
+      </div>
+
+      {/* Create/Edit Modal */}
+      {modalOpen && (
+        <TaskModal
+          task={editingTask}
+          onClose={() => { setModalOpen(false); setEditingTask(null); }}
+          onSubmit={editingTask ? handleEdit : handleCreate}
+        />
+      )}
+    </UserLayout>
+  );
+};
+
+// ─── List Row View ─────────────────────────────────────────────────────────────
+
+interface ListRowProps {
+  task: Task;
+  onEdit: (t: Task) => void;
+  onDelete: (id: number) => void;
+  onStatusChange: (id: number, status: TaskStatus) => void;
+}
+
+const STATUS_COLORS: Record<TaskStatus, string> = {
+  Pending: 'bg-amber-100 text-amber-600',
+  Doing: 'bg-blue-100 text-blue-600',
+  Done: 'bg-green-100 text-brand',
+};
+
+const ListTaskRow: React.FC<ListRowProps> = ({ task, onEdit, onDelete, onStatusChange }) => {
+  const nextStatus = task.status === 'Pending' ? 'Doing' : task.status === 'Doing' ? 'Done' : 'Pending';
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-4 flex items-center gap-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+      {/* Color dot */}
+      <div className="w-3 h-3 rounded-full bg-brand flex-shrink-0" />
+
+      {/* Title + category */}
+      <div className="flex-1 min-w-0">
+        <p className="font-black text-gray-800 text-sm truncate group-hover:text-brand transition-colors">{task.title}</p>
+        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{task.category}</p>
+      </div>
+
+      {/* Status badge */}
+      <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider flex-shrink-0 ${STATUS_COLORS[task.status]}`}>
+        {task.status}
+      </span>
+
+      {/* Progress */}
+      <div className="flex items-center gap-2 flex-shrink-0 w-32">
+        <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-full bg-brand rounded-full" style={{ width: `${task.progress}%` }} />
+        </div>
+        <span className="text-xs font-black text-gray-500 w-8 text-right">{task.progress}%</span>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-2 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button
+          onClick={() => onStatusChange(task.id, nextStatus as TaskStatus)}
+          className="p-1.5 rounded-lg bg-brand/10 text-brand hover:bg-brand/20 transition-colors text-xs font-bold"
+          title={`Mark as ${nextStatus}`}
+        >
+          →{nextStatus}
+        </button>
+        <button
+          onClick={() => onEdit(task)}
+          className="p-1.5 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 transition-colors"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+        </button>
+        <button
+          onClick={() => onDelete(task.id)}
+          className="p-1.5 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 transition-colors"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
 };
