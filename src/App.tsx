@@ -10,20 +10,23 @@ import { SystemSettings } from './pages/admin/SystemSettings';
 import { ToastProvider } from './components/ui/Toast';
 import { UserDashboard } from './pages/user/UserDashboard';
 import { AuthProvider } from './context/AuthContext';
+import { TaskProvider } from './context/TaskContext';
 import { UserPlaceholder } from './pages/user/UserPlaceholder';
-import { 
-  LayoutGrid, 
-  Calendar, 
-  MessageSquare, 
-  Users2, 
-  ToyBrick, 
-  Compass, 
-  Settings 
+import { BoardsPage } from './pages/user/BoardsPage';
+import { ProfilePage } from './pages/user/ProfilePage';
+import {
+  Calendar,
+  MessageSquare,
+  Users2,
+  ToyBrick,
+  Compass,
+  Settings
 } from 'lucide-react';
 
 function App() {
   return (
     <AuthProvider>
+      <TaskProvider>
       <ToastProvider>
         <Router>
           <Routes>
@@ -31,7 +34,8 @@ function App() {
             <Route path="/dashboard" element={<UserDashboard />} />
             
             {/* User Navigation Routes */}
-            <Route path="/boards" element={<UserPlaceholder title="Boards" icon={LayoutGrid} />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/boards" element={<BoardsPage />} />
             <Route path="/schedule" element={<UserPlaceholder title="Plan Schedule" icon={Calendar} />} />
             <Route path="/messages" element={<UserPlaceholder title="Messages" icon={MessageSquare} />} />
             <Route path="/team" element={<UserPlaceholder title="Team Members" icon={Users2} />} />
@@ -53,6 +57,7 @@ function App() {
           </Routes>
       </Router>
       </ToastProvider>
+      </TaskProvider>
     </AuthProvider>
   );
 }

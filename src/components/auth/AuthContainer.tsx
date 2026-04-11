@@ -113,6 +113,7 @@ export const AuthContainer: React.FC = () => {
       const token = data.token || data.accessToken || data.jwt || data.id_token;
       if (token) {
         login(token, {
+          id: data.id,
           email: signinEmail,
           name: data.username || signinEmail.split('@')[0],
           role: data.role || (signinEmail === 'admin@gmail.com' ? 'ADMIN' : 'USER')

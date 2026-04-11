@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export interface UserProfile {
+  id?: number;
   name?: string;
   email: string;
   role: string;
@@ -10,6 +11,7 @@ interface AuthContextType {
   user: UserProfile | null;
   login: (token: string, profile: UserProfile) => void;
   logout: () => void;
+  updateProfile: (patch: Partial<UserProfile>) => void;
   isAuthenticated: boolean;
 }
 
@@ -42,11 +44,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
-    window.location.href = '/'; // Simple redirect on logout
+    window.location.href = '/';
+  };
+
+  const updateProfile = (patch: Partial<UserProfile>) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const updated = { ...prev, ...patch };
+      localStorage.setItem('user', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, logout, updateProfile, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );
