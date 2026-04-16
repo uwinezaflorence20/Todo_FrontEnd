@@ -5,7 +5,7 @@ import { UserTopbar } from './UserTopbar';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/ui/Toast';
 import { userApi } from '../../services/api';
-import { User, Mail, Shield, Pencil, Check, X, Loader2, KeyRound } from 'lucide-react';
+import { User, Mail, Shield, Pencil, Check, X, Loader2, KeyRound, Eye, EyeOff, AlertCircle } from 'lucide-react';
 
 export const ProfilePage: React.FC = () => {
   const { user, updateProfile } = useAuth();
@@ -24,6 +24,20 @@ export const ProfilePage: React.FC = () => {
   const [newPw, setNewPw] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
   const [savingPw, setSavingPw] = useState(false);
+  const [showCurrentPw, setShowCurrentPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
+  const [pwErrors, setPwErrors] = useState<Record<string, string>>({});
+
+  const getPasswordStrength = (pw: string) => {
+    if (!pw) return null;
+    if (pw.length < 6) return { label: 'Weak', color: 'bg-red-400', width: '25%' };
+    if (pw.length < 10 && !/[A-Z]/.test(pw)) return { label: 'Fair', color: 'bg-yellow-400', width: '50%' };
+    if (/[A-Z]/.test(pw) && /[0-9]/.test(pw) && pw.length >= 8) return { label: 'Strong', color: 'bg-green-400', width: '100%' };
+    return { label: 'Good', color: 'bg-blue-400', width: '75%' };
+  };
+
+  const pwStrength = getPasswordStrength(newPw);
 
   const handleSaveProfile = async () => {
     if (!user?.id) {
@@ -51,14 +65,14 @@ export const ProfilePage: React.FC = () => {
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPw !== confirmPw) {
-      showError('Password Mismatch', 'New password and confirmation do not match.');
-      return;
-    }
-    if (newPw.length < 6) {
-      showError('Too Short', 'Password must be at least 6 characters.');
-      return;
-    }
+    const errors: Record<string, string> = {};
+    if (!currentPw) errors.currentPw = 'Current password is required.';
+    if (!newPw) errors.newPw = 'New password is required.';
+    else if (newPw.length < 6) errors.newPw = 'Password must be at least 6 characters.';
+    if (!confirmPw) errors.confirmPw = 'Please confirm your new password.';
+    else if (newPw !== confirmPw) errors.confirmPw = 'Passwords do not match.';
+    if (Object.keys(errors).length > 0) { setPwErrors(errors); return; }
+    setPwErrors({});
     setSavingPw(true);
     try {
       const token = localStorage.getItem('token');
@@ -205,41 +219,73 @@ export const ProfilePage: React.FC = () => {
               Click "Change" to update your password.
             </p>
           ) : (
-            <form onSubmit={handleChangePassword} className="flex flex-col gap-5">
-              <div className="flex flex-col gap-2">
+            <form onSubmit={handleChangePassword} className="flex flex-col gap-4">
+              {/* Current Password */}
+              <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-black text-gray-400 uppercase tracking-wider">Current Password</label>
-                <input
-                  type="password"
-                  value={currentPw}
-                  onChange={(e) => setCurrentPw(e.target.value)}
-                  required
-                  className="px-5 py-3.5 rounded-xl bg-gray-50 border border-gray-200 text-base font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand/30 transition-all"
-                />
+                <div className="relative">
+                  <input
+                    type={showCurrentPw ? 'text' : 'password'}
+                    value={currentPw}
+                    onChange={(e) => { setCurrentPw(e.target.value); setPwErrors(p => ({ ...p, currentPw: '' })); }}
+                    className={`w-full pl-5 pr-12 py-3.5 rounded-xl border text-base font-semibold text-gray-800 focus:outline-none focus:ring-2 transition-all ${pwErrors.currentPw ? 'bg-red-50 border-red-300 focus:ring-red-100' : 'bg-gray-50 border-gray-200 focus:ring-brand/20 focus:border-brand/30'}`}
+                  />
+                  <button type="button" onClick={() => setShowCurrentPw(v => !v)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand transition-colors">
+                    {showCurrentPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {pwErrors.currentPw && <p className="flex items-center gap-1 text-xs font-semibold text-red-500"><AlertCircle className="w-3.5 h-3.5" />{pwErrors.currentPw}</p>}
               </div>
-              <div className="flex flex-col gap-2">
+
+              {/* New Password */}
+              <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-black text-gray-400 uppercase tracking-wider">New Password</label>
-                <input
-                  type="password"
-                  value={newPw}
-                  onChange={(e) => setNewPw(e.target.value)}
-                  required
-                  className="px-5 py-3.5 rounded-xl bg-gray-50 border border-gray-200 text-base font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand/30 transition-all"
-                />
+                <div className="relative">
+                  <input
+                    type={showNewPw ? 'text' : 'password'}
+                    value={newPw}
+                    onChange={(e) => { setNewPw(e.target.value); setPwErrors(p => ({ ...p, newPw: '' })); }}
+                    className={`w-full pl-5 pr-12 py-3.5 rounded-xl border text-base font-semibold text-gray-800 focus:outline-none focus:ring-2 transition-all ${pwErrors.newPw ? 'bg-red-50 border-red-300 focus:ring-red-100' : 'bg-gray-50 border-gray-200 focus:ring-brand/20 focus:border-brand/30'}`}
+                  />
+                  <button type="button" onClick={() => setShowNewPw(v => !v)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand transition-colors">
+                    {showNewPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {pwErrors.newPw && <p className="flex items-center gap-1 text-xs font-semibold text-red-500"><AlertCircle className="w-3.5 h-3.5" />{pwErrors.newPw}</p>}
+                {newPw && pwStrength && (
+                  <div>
+                    <div className="h-1.5 w-full rounded-full bg-gray-200">
+                      <div className={`h-full rounded-full transition-all duration-300 ${pwStrength.color}`} style={{ width: pwStrength.width }} />
+                    </div>
+                    <p className="mt-1 text-xs font-semibold text-gray-400">{pwStrength.label} password</p>
+                  </div>
+                )}
               </div>
-              <div className="flex flex-col gap-2">
+
+              {/* Confirm Password */}
+              <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-black text-gray-400 uppercase tracking-wider">Confirm New Password</label>
-                <input
-                  type="password"
-                  value={confirmPw}
-                  onChange={(e) => setConfirmPw(e.target.value)}
-                  required
-                  className="px-5 py-3.5 rounded-xl bg-gray-50 border border-gray-200 text-base font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand/30 transition-all"
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPw ? 'text' : 'password'}
+                    value={confirmPw}
+                    onChange={(e) => { setConfirmPw(e.target.value); setPwErrors(p => ({ ...p, confirmPw: '' })); }}
+                    className={`w-full pl-5 pr-12 py-3.5 rounded-xl border text-base font-semibold text-gray-800 focus:outline-none focus:ring-2 transition-all ${pwErrors.confirmPw ? 'bg-red-50 border-red-300 focus:ring-red-100' : confirmPw && confirmPw === newPw ? 'bg-green-50 border-green-300 focus:ring-green-100' : 'bg-gray-50 border-gray-200 focus:ring-brand/20 focus:border-brand/30'}`}
+                  />
+                  <button type="button" onClick={() => setShowConfirmPw(v => !v)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand transition-colors">
+                    {showConfirmPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {pwErrors.confirmPw && <p className="flex items-center gap-1 text-xs font-semibold text-red-500"><AlertCircle className="w-3.5 h-3.5" />{pwErrors.confirmPw}</p>}
+                {confirmPw && confirmPw === newPw && !pwErrors.confirmPw && (
+                  <p className="flex items-center gap-1 text-xs font-semibold text-green-500"><Check className="w-3.5 h-3.5" />Passwords match</p>
+                )}
               </div>
+
               <div className="flex gap-3 pt-1">
                 <button
                   type="button"
-                  onClick={() => { setPwSection(false); setCurrentPw(''); setNewPw(''); setConfirmPw(''); }}
+                  onClick={() => { setPwSection(false); setCurrentPw(''); setNewPw(''); setConfirmPw(''); setPwErrors({}); }}
                   className="flex-1 py-3.5 rounded-xl bg-gray-100 text-gray-500 text-base font-bold hover:bg-gray-200 transition-colors"
                 >
                   Cancel

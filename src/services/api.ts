@@ -18,10 +18,27 @@ function authHeaders() {
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
-    let message = `Request failed: ${res.statusText}`;
+    if (res.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/auth';
+      throw new Error('Session expired. Please sign in again.');
+    }
+
+    const statusMessages: Record<number, string> = {
+      400: 'Invalid request. Please check your input.',
+      403: 'You do not have permission to perform this action.',
+      404: 'The requested resource was not found.',
+      409: 'A conflict occurred. The resource may already exist.',
+      422: 'Validation failed. Please check your input.',
+      429: 'Too many requests. Please wait a moment and try again.',
+      500: 'Server error. Please try again later.',
+      503: 'Service unavailable. Please try again later.',
+    };
+
+    let message = statusMessages[res.status] || `Request failed (${res.status})`;
     try {
       const data = await res.json();
-      message = data.message || message;
+      message = data.message || data.error || message;
     } catch { /* ignore */ }
     throw new Error(message);
   }

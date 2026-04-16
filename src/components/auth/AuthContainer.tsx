@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
 import { ForgotPassword } from './ForgotPassword';
 import { useToast } from '../ui/Toast';
 import { useAuth } from '../../context/AuthContext';
@@ -27,12 +27,36 @@ export const AuthContainer: React.FC = () => {
   const [signupPassword, setSignupPassword] = useState('');
   const [signupError, setSignupError] = useState<string | null>(null);
   const [isSigningUp, setIsSigningUp] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [signupFieldErrors, setSignupFieldErrors] = useState<Record<string, string>>({});
 
   // Signin form state
   const [signinEmail, setSigninEmail] = useState('');
   const [signinPassword, setSigninPassword] = useState('');
   const [signinError, setSigninError] = useState<string | null>(null);
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [showSigninPassword, setShowSigninPassword] = useState(false);
+
+  const validateSignup = () => {
+    const errors: Record<string, string> = {};
+    if (!signupUsername.trim()) errors.username = 'Username is required';
+    else if (signupUsername.length < 3) errors.username = 'Username must be at least 3 characters';
+    if (!signupEmail.trim()) errors.email = 'Email is required';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signupEmail)) errors.email = 'Enter a valid email address';
+    if (!signupPassword) errors.password = 'Password is required';
+    else if (signupPassword.length < 6) errors.password = 'Password must be at least 6 characters';
+    return errors;
+  };
+
+  const getPasswordStrength = (pw: string): { label: string; color: string; width: string } => {
+    if (!pw) return { label: '', color: '', width: '0%' };
+    if (pw.length < 6) return { label: 'Weak', color: 'bg-red-400', width: '25%' };
+    if (pw.length < 10 && !/[A-Z]/.test(pw)) return { label: 'Fair', color: 'bg-yellow-400', width: '50%' };
+    if (/[A-Z]/.test(pw) && /[0-9]/.test(pw) && pw.length >= 8) return { label: 'Strong', color: 'bg-green-400', width: '100%' };
+    return { label: 'Good', color: 'bg-blue-400', width: '75%' };
+  };
+
+  const pwStrength = getPasswordStrength(signupPassword);
 
   const toggleForm = () => {
     setIsSignUp(!isSignUp);
@@ -49,6 +73,12 @@ export const AuthContainer: React.FC = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setSignupError(null);
+    const fieldErrors = validateSignup();
+    if (Object.keys(fieldErrors).length > 0) {
+      setSignupFieldErrors(fieldErrors);
+      return;
+    }
+    setSignupFieldErrors({});
     setIsSigningUp(true);
 
     try {
@@ -159,37 +189,62 @@ export const AuthContainer: React.FC = () => {
               </button>
             </div>
             <p className="mb-6 text-base text-gray-400">or use your email for registration:</p>
-            {signupError && <p className="mb-4 text-sm font-bold text-red-500">{signupError}</p>}
-            <div className="w-full max-w-md space-y-4">
-              <input 
-                type="text" 
-                placeholder="Username" 
-                value={signupUsername}
-                onChange={(e) => setSignupUsername(e.target.value)}
-                required
-                className="w-full rounded-xl bg-brand-light py-4 px-6 outline-none text-lg border-2 border-transparent focus:border-brand/30 transition-all" 
-              />
-              <input 
-                type="email" 
-                placeholder="Email" 
-                value={signupEmail}
-                onChange={(e) => setSignupEmail(e.target.value)}
-                required
-                className="w-full rounded-xl bg-brand-light py-4 px-6 outline-none text-lg border-2 border-transparent focus:border-brand/30 transition-all" 
-              />
-              <input 
-                type="password" 
-                placeholder="Password" 
-                value={signupPassword}
-                onChange={(e) => setSignupPassword(e.target.value)}
-                required
-                className="w-full rounded-xl bg-brand-light py-4 px-6 outline-none text-lg border-2 border-transparent focus:border-brand/30 transition-all" 
-              />
-              <button 
-                type="submit" 
+            {signupError && (
+              <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm font-semibold text-red-600">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                {signupError}
+              </div>
+            )}
+            <div className="w-full max-w-md space-y-3">
+              <div>
+                <input
+                  type="text"
+                  placeholder="Username"
+                  value={signupUsername}
+                  onChange={(e) => { setSignupUsername(e.target.value); setSignupFieldErrors(p => ({ ...p, username: '' })); }}
+                  className={`w-full rounded-xl bg-brand-light py-4 px-6 outline-none text-lg border-2 transition-all ${signupFieldErrors.username ? 'border-red-400 bg-red-50' : 'border-transparent focus:border-brand/30'}`}
+                />
+                {signupFieldErrors.username && <p className="mt-1 ml-2 text-xs font-semibold text-red-500">{signupFieldErrors.username}</p>}
+              </div>
+              <div>
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={signupEmail}
+                  onChange={(e) => { setSignupEmail(e.target.value); setSignupFieldErrors(p => ({ ...p, email: '' })); }}
+                  className={`w-full rounded-xl bg-brand-light py-4 px-6 outline-none text-lg border-2 transition-all ${signupFieldErrors.email ? 'border-red-400 bg-red-50' : 'border-transparent focus:border-brand/30'}`}
+                />
+                {signupFieldErrors.email && <p className="mt-1 ml-2 text-xs font-semibold text-red-500">{signupFieldErrors.email}</p>}
+              </div>
+              <div>
+                <div className="relative">
+                  <input
+                    type={showSignupPassword ? 'text' : 'password'}
+                    placeholder="Password"
+                    value={signupPassword}
+                    onChange={(e) => { setSignupPassword(e.target.value); setSignupFieldErrors(p => ({ ...p, password: '' })); }}
+                    className={`w-full rounded-xl bg-brand-light py-4 pl-6 pr-14 outline-none text-lg border-2 transition-all ${signupFieldErrors.password ? 'border-red-400 bg-red-50' : 'border-transparent focus:border-brand/30'}`}
+                  />
+                  <button type="button" onClick={() => setShowSignupPassword(v => !v)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand transition-colors">
+                    {showSignupPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                {signupFieldErrors.password && <p className="mt-1 ml-2 text-xs font-semibold text-red-500">{signupFieldErrors.password}</p>}
+                {signupPassword && (
+                  <div className="mt-2 px-1">
+                    <div className="h-1.5 w-full rounded-full bg-gray-200">
+                      <div className={`h-full rounded-full transition-all duration-300 ${pwStrength.color}`} style={{ width: pwStrength.width }} />
+                    </div>
+                    <p className="mt-1 text-xs font-semibold text-gray-400">{pwStrength.label} password</p>
+                  </div>
+                )}
+              </div>
+              <button
+                type="submit"
                 disabled={isSigningUp}
-                className="mt-6 w-full rounded-full bg-brand py-4 text-lg font-bold text-white shadow-lg transition-all hover:bg-brand-dark hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                className="mt-4 w-full rounded-full bg-brand py-4 text-lg font-bold text-white shadow-lg transition-all hover:bg-brand-dark hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
               >
+                {isSigningUp && <Loader2 className="w-5 h-5 animate-spin" />}
                 {isSigningUp ? 'SIGNING UP...' : 'SIGN UP'}
               </button>
             </div>
@@ -218,38 +273,49 @@ export const AuthContainer: React.FC = () => {
                 </button>
               </div>
               <p className="mb-6 text-base text-gray-400">or use your email account:</p>
-              {signinError && <p className="mb-4 text-sm font-bold text-red-500">{signinError}</p>}
+              {signinError && (
+                <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm font-semibold text-red-600">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  {signinError}
+                </div>
+              )}
               <div className="w-full max-w-md space-y-4">
-                <input 
-                  type="email" 
-                  placeholder="Email" 
+                <input
+                  type="email"
+                  placeholder="Email"
                   value={signinEmail}
                   onChange={(e) => setSigninEmail(e.target.value)}
                   required
-                  className="w-full rounded-xl bg-brand-light py-4 px-6 outline-none text-lg border-2 border-transparent focus:border-brand/30 transition-all" 
+                  className="w-full rounded-xl bg-brand-light py-4 px-6 outline-none text-lg border-2 border-transparent focus:border-brand/30 transition-all"
                 />
-                <input 
-                  type="password" 
-                  placeholder="Password" 
-                  value={signinPassword}
-                  onChange={(e) => setSigninPassword(e.target.value)}
-                  required
-                  className="w-full rounded-xl bg-brand-light py-4 px-6 outline-none text-lg border-2 border-transparent focus:border-brand/30 transition-all" 
-                />
-                <div className="mt-4 text-center">
-                  <a 
-                    href="#" 
+                <div className="relative">
+                  <input
+                    type={showSigninPassword ? 'text' : 'password'}
+                    placeholder="Password"
+                    value={signinPassword}
+                    onChange={(e) => setSigninPassword(e.target.value)}
+                    required
+                    className="w-full rounded-xl bg-brand-light py-4 pl-6 pr-14 outline-none text-lg border-2 border-transparent focus:border-brand/30 transition-all"
+                  />
+                  <button type="button" onClick={() => setShowSigninPassword(v => !v)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand transition-colors">
+                    {showSigninPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                <div className="mt-2 text-center">
+                  <a
+                    href="#"
                     onClick={handleForgotPassword}
-                    className="text-sm text-gray-600 underline decoration-gray-300 decoration-2 transition-colors hover:text-brand"
+                    className="text-sm text-gray-500 underline decoration-gray-300 decoration-2 transition-colors hover:text-brand"
                   >
                     Forgot your password?
                   </a>
                 </div>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={isSigningIn}
-                  className="mt-8 w-full rounded-full bg-brand py-4 text-lg font-bold text-white shadow-lg transition-all hover:bg-brand-dark hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  className="mt-6 w-full rounded-full bg-brand py-4 text-lg font-bold text-white shadow-lg transition-all hover:bg-brand-dark hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
                 >
+                  {isSigningIn && <Loader2 className="w-5 h-5 animate-spin" />}
                   {isSigningIn ? 'SIGNING IN...' : 'SIGN IN'}
                 </button>
               </div>
