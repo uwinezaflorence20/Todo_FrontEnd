@@ -62,7 +62,7 @@ export const ProfilePage: React.FC = () => {
     setSavingPw(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('https://backend-todo-list-8tnv.onrender.com/api/auth/change-password', {
+      const res = await fetch('/api/auth/change-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ currentPassword: currentPw, newPassword: newPw }),

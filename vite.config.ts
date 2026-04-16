@@ -8,4 +8,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://backend-todo-list-8tnv.onrender.com',
+        changeOrigin: true,
+        secure: true,
+      },
+    },
+  },
 })

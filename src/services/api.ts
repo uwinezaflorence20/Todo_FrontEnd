@@ -1,4 +1,6 @@
-const BASE_URL = 'https://backend-todo-list-8tnv.onrender.com';
+const BASE_URL = import.meta.env.PROD
+  ? 'https://backend-todo-list-8tnv.onrender.com'
+  : '';
 
 function getToken(): string {
   const token = localStorage.getItem('token');

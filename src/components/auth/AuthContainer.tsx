@@ -52,7 +52,7 @@ export const AuthContainer: React.FC = () => {
     setIsSigningUp(true);
 
     try {
-      const response = await fetch('https://backend-todo-list-8tnv.onrender.com/api/auth/signup', {
+      const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
           'accept': '*/*',
@@ -89,7 +89,7 @@ export const AuthContainer: React.FC = () => {
     setIsSigningIn(true);
 
     try {
-      const response = await fetch('https://backend-todo-list-8tnv.onrender.com/api/auth/signin', {
+      const response = await fetch('/api/auth/signin', {
         method: 'POST',
         headers: {
           'accept': '*/*',

@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { useToast } from '../ui/Toast';
 import { Loader2 } from 'lucide-react';
 
-const BASE_URL = 'https://backend-todo-list-8tnv.onrender.com';
+const BASE_URL = import.meta.env.PROD
+  ? 'https://backend-todo-list-8tnv.onrender.com'
+  : '';
 
 interface ForgotPasswordProps {
   onBack: () => void;
