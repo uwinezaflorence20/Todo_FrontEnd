@@ -7,7 +7,7 @@ import { TaskModal } from './TaskModal';
 import { useTasks } from '../../context/TaskContext';
 import { useToast } from '../../components/ui/Toast';
 import type { Task, TaskStatus, CreateTaskPayload } from '../../services/api';
-import { Grid, List, Loader2, Plus } from 'lucide-react';
+import { Grid, List, Loader2, Plus, Edit2, Trash2, Clock, AlertTriangle, AlertCircle, ClipboardList } from 'lucide-react';
 
 type ViewMode = 'grid' | 'list';
 
@@ -166,8 +166,11 @@ export const UserDashboard: React.FC = () => {
         {/* Error */}
         {error && !loading && (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <div className="bg-red-50 border border-red-100 rounded-2xl px-8 py-6 text-center max-w-md">
-              <p className="text-red-500 font-bold mb-4">{error}</p>
+            <div className="bg-red-50 border border-red-200 rounded-2xl px-8 py-6 text-center max-w-md flex flex-col items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+                <AlertCircle className="w-6 h-6 text-red-500" />
+              </div>
+              <p className="text-red-600 font-bold">{error}</p>
               <button
                 onClick={fetchTasks}
                 className="px-6 py-2.5 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark transition-all text-sm"
@@ -182,7 +185,7 @@ export const UserDashboard: React.FC = () => {
         {!loading && !error && filteredTasks.length === 0 && (
           <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
             <div className="w-20 h-20 rounded-3xl bg-brand/10 flex items-center justify-center mb-2">
-              <Plus className="w-10 h-10 text-brand" />
+              <ClipboardList className="w-10 h-10 text-brand" />
             </div>
             <h3 className="text-xl font-black text-gray-700">
               {searchQuery ? 'No tasks match your search' : 'No tasks yet'}
@@ -261,58 +264,93 @@ const STATUS_COLORS: Record<TaskStatus, string> = {
 };
 
 const ListTaskRow: React.FC<ListRowProps> = ({ task, onEdit, onDelete, onStatusChange }) => {
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const nextStatus = task.status === 'Pending' ? 'Doing' : task.status === 'Doing' ? 'Done' : 'Pending';
 
+  const getDueInfo = () => {
+    if (!task.dueDate) return null;
+    const days = Math.ceil((new Date(task.dueDate).getTime() - Date.now()) / 86400000);
+    if (days < 0) return { text: 'Overdue', cls: 'text-red-500' };
+    if (days === 0) return { text: 'Due today', cls: 'text-amber-500' };
+    if (days === 1) return { text: '1 day left', cls: 'text-amber-500' };
+    return { text: `${days}d left`, cls: 'text-gray-400' };
+  };
+  const dueInfo = getDueInfo();
+  const isOverdue = dueInfo?.cls === 'text-red-500' && task.status !== 'Done';
+
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-4 flex items-center gap-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
-      {/* Color dot */}
-      <div className="w-3 h-3 rounded-full bg-brand flex-shrink-0" />
+    <>
+      <div className={`bg-white rounded-2xl shadow-sm border px-6 py-4 flex items-center gap-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group ${isOverdue ? 'border-red-100' : 'border-gray-100'}`}>
+        {/* Status dot */}
+        <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${task.status === 'Done' ? 'bg-green-400' : task.status === 'Doing' ? 'bg-blue-400' : 'bg-amber-400'}`} />
 
-      {/* Title + category */}
-      <div className="flex-1 min-w-0">
-        <p className="font-black text-gray-800 text-sm truncate group-hover:text-brand transition-colors">{task.title}</p>
-        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{task.category}</p>
-      </div>
-
-      {/* Status badge */}
-      <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider flex-shrink-0 ${STATUS_COLORS[task.status]}`}>
-        {task.status}
-      </span>
-
-      {/* Progress */}
-      <div className="flex items-center gap-2 flex-shrink-0 w-32">
-        <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-          <div className="h-full bg-brand rounded-full" style={{ width: `${task.progress}%` }} />
+        {/* Title + meta */}
+        <div className="flex-1 min-w-0">
+          <p className={`font-black text-sm truncate transition-colors ${task.status === 'Done' ? 'line-through text-gray-400' : 'text-gray-800 group-hover:text-brand'}`}>{task.title}</p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{task.category}</span>
+            {dueInfo && (
+              <span className={`flex items-center gap-0.5 text-[10px] font-bold ${dueInfo.cls}`}>
+                {isOverdue ? <AlertTriangle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                {dueInfo.text}
+              </span>
+            )}
+          </div>
         </div>
-        <span className="text-xs font-black text-gray-500 w-8 text-right">{task.progress}%</span>
+
+        {/* Status badge */}
+        <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider shrink-0 ${STATUS_COLORS[task.status]}`}>
+          {task.status}
+        </span>
+
+        {/* Progress */}
+        <div className="flex items-center gap-2 shrink-0 w-28">
+          <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div className={`h-full rounded-full transition-all ${task.progress === 100 ? 'bg-green-400' : 'bg-brand'}`} style={{ width: `${task.progress}%` }} />
+          </div>
+          <span className="text-xs font-black text-gray-500 w-8 text-right">{task.progress}%</span>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={() => onStatusChange(task.id, nextStatus as TaskStatus)}
+            className="px-2.5 py-1.5 rounded-lg bg-brand/10 text-brand hover:bg-brand/20 transition-colors text-[10px] font-black"
+            title={`Mark as ${nextStatus}`}
+          >
+            → {nextStatus}
+          </button>
+          <button onClick={() => onEdit(task)} className="p-1.5 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 transition-colors">
+            <Edit2 className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => setConfirmDelete(true)} className="p-1.5 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 transition-colors">
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-2 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button
-          onClick={() => onStatusChange(task.id, nextStatus as TaskStatus)}
-          className="p-1.5 rounded-lg bg-brand/10 text-brand hover:bg-brand/20 transition-colors text-xs font-bold"
-          title={`Mark as ${nextStatus}`}
-        >
-          →{nextStatus}
-        </button>
-        <button
-          onClick={() => onEdit(task)}
-          className="p-1.5 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-100 transition-colors"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-          </svg>
-        </button>
-        <button
-          onClick={() => onDelete(task.id)}
-          className="p-1.5 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 transition-colors"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-        </button>
-      </div>
-    </div>
+      {/* Delete confirmation */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setConfirmDelete(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center flex flex-col items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+              <AlertTriangle className="w-6 h-6 text-red-500" />
+            </div>
+            <div>
+              <p className="font-black text-gray-800">Delete "{task.title}"?</p>
+              <p className="text-sm text-gray-400 mt-1">This cannot be undone.</p>
+            </div>
+            <div className="flex gap-3 w-full">
+              <button onClick={() => setConfirmDelete(false)} className="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 font-bold hover:bg-gray-200 transition-colors text-sm">Cancel</button>
+              <button onClick={() => { setConfirmDelete(false); onDelete(task.id); }} className="flex-1 py-2.5 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition-colors text-sm flex items-center justify-center gap-1.5">
+                <Trash2 className="w-3.5 h-3.5" />
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };

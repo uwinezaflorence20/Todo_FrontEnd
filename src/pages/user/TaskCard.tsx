@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Clock, MoreVertical, Edit2, Trash2, CheckCircle, RotateCcw, PlayCircle } from 'lucide-react';
+import { Clock, MoreVertical, Edit2, Trash2, CheckCircle, RotateCcw, PlayCircle, AlertTriangle, X } from 'lucide-react';
 import type { Task, TaskStatus } from '../../services/api';
 
 interface TaskCardProps {
@@ -28,28 +28,31 @@ function getCategoryColor(category: string): string {
   return CATEGORY_COLORS[category] ?? '#0ec277';
 }
 
-function formatDueDate(dueDate?: string): string {
-  if (!dueDate) return 'No deadline';
+function formatDueDate(dueDate?: string): { text: string; urgent: boolean; overdue: boolean } {
+  if (!dueDate) return { text: 'No deadline', urgent: false, overdue: false };
   const d = new Date(dueDate);
   const now = new Date();
   const diff = d.getTime() - now.getTime();
   const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-  if (days < 0) return 'Overdue';
-  if (days === 0) return 'Due today';
-  if (days === 1) return '1 day left';
-  if (days < 7) return `${days} days left`;
-  if (days < 14) return '1 week left';
-  return `${Math.ceil(days / 7)} weeks left`;
+  if (days < 0) return { text: 'Overdue', urgent: true, overdue: true };
+  if (days === 0) return { text: 'Due today', urgent: true, overdue: false };
+  if (days === 1) return { text: '1 day left', urgent: true, overdue: false };
+  if (days < 7) return { text: `${days} days left`, urgent: false, overdue: false };
+  if (days < 14) return { text: '1 week left', urgent: false, overdue: false };
+  return { text: `${Math.ceil(days / 7)} weeks left`, urgent: false, overdue: false };
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete, onStatusChange }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const bgColor = getCategoryColor(task.category);
+  const due = formatDueDate(task.dueDate);
 
   const handleDelete = async () => {
     setDeleting(true);
+    setConfirmDelete(false);
     setMenuOpen(false);
     onDelete(task.id);
   };
@@ -64,9 +67,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete, onSt
 
   return (
     <div
-      className={`bg-white p-7 rounded-[2rem] shadow-xl shadow-gray-200/50 border border-transparent hover:border-brand/10 transition-all duration-300 hover:-translate-y-1 overflow-hidden group relative ${
+      className={`bg-white p-7 rounded-4xl shadow-xl shadow-gray-200/50 border transition-all duration-300 hover:-translate-y-1 overflow-hidden group relative ${
         deleting ? 'opacity-50 pointer-events-none' : ''
-      }`}
+      } ${due.overdue && task.status !== 'Done' ? 'border-red-100 hover:border-red-200' : 'border-transparent hover:border-brand/10'}`}
     >
       {/* Status badge */}
       <div className="absolute top-5 left-7">
@@ -103,7 +106,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete, onSt
             )}
             <div className="h-px bg-gray-100 mx-2 my-1" />
             <button
-              onClick={handleDelete}
+              onClick={() => { setMenuOpen(false); setConfirmDelete(true); }}
               className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors"
             >
               <Trash2 className="w-4 h-4" />
@@ -116,6 +119,35 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete, onSt
       {/* Backdrop click to close menu */}
       {menuOpen && (
         <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+      )}
+
+      {/* Delete confirmation overlay */}
+      {confirmDelete && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/95 rounded-4xl p-6 text-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+            <AlertTriangle className="w-6 h-6 text-red-500" />
+          </div>
+          <div>
+            <p className="font-black text-gray-800 text-base">Delete this task?</p>
+            <p className="text-xs text-gray-400 font-medium mt-1">This cannot be undone.</p>
+          </div>
+          <div className="flex gap-2 w-full">
+            <button
+              onClick={() => setConfirmDelete(false)}
+              className="flex-1 py-2 rounded-xl bg-gray-100 text-gray-500 text-sm font-bold hover:bg-gray-200 transition-colors flex items-center justify-center gap-1"
+            >
+              <X className="w-3.5 h-3.5" />
+              Cancel
+            </button>
+            <button
+              onClick={handleDelete}
+              className="flex-1 py-2 rounded-xl bg-red-500 text-white text-sm font-bold hover:bg-red-600 transition-colors flex items-center justify-center gap-1"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Delete
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Icon and Content */}
@@ -138,9 +170,12 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete, onSt
       </div>
 
       {/* Due date */}
-      <div className="flex items-center gap-2 mb-6 text-gray-400 font-bold text-xs">
-        <Clock className="w-3.5 h-3.5" />
-        <span>{formatDueDate(task.dueDate)}</span>
+      <div className={`flex items-center gap-2 mb-6 font-bold text-xs ${
+        task.status !== 'Done' && due.overdue ? 'text-red-500' :
+        task.status !== 'Done' && due.urgent ? 'text-amber-500' : 'text-gray-400'
+      }`}>
+        {due.overdue && task.status !== 'Done' ? <AlertTriangle className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5" />}
+        <span>{due.text}</span>
       </div>
 
       {/* Progress */}

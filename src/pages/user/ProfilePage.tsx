@@ -101,7 +101,7 @@ export const ProfilePage: React.FC = () => {
 
         {/* Avatar card */}
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 flex items-center gap-6">
-          <div className="w-28 h-28 rounded-3xl bg-brand/10 flex items-center justify-center text-brand font-black text-5xl shadow-inner flex-shrink-0">
+          <div className="w-28 h-28 rounded-3xl bg-brand/10 flex items-center justify-center text-brand font-black text-5xl shadow-inner shrink-0">
             {initials}
           </div>
           <div>

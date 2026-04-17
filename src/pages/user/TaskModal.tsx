@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, AlertCircle, Calendar } from 'lucide-react';
 import type { Task, CreateTaskPayload, TaskStatus } from '../../services/api';
 
 interface TaskModalProps {
@@ -22,6 +22,15 @@ export const TaskModal: React.FC<TaskModalProps> = ({ task, onClose, onSubmit })
   const [dueDate, setDueDate] = useState(task?.dueDate ?? '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [titleError, setTitleError] = useState('');
+
+  const today = new Date().toISOString().split('T')[0];
+  const dueDatePast = dueDate && dueDate < today && status !== 'Done';
+
+  const progressColor =
+    progress === 100 ? 'bg-green-400' :
+    progress >= 60 ? 'bg-blue-400' :
+    progress >= 30 ? 'bg-yellow-400' : 'bg-red-400';
 
   // sync progress with status
   useEffect(() => {
@@ -31,7 +40,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({ task, onClose, onSubmit })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) { setError('Title is required'); return; }
+    if (!title.trim()) { setTitleError('Title is required.'); return; }
+    if (title.trim().length > 100) { setTitleError('Title must be 100 characters or fewer.'); return; }
+    setTitleError('');
     setError(null);
     setLoading(true);
     try {
@@ -45,7 +56,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ task, onClose, onSubmit })
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-200 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
@@ -69,29 +80,35 @@ export const TaskModal: React.FC<TaskModalProps> = ({ task, onClose, onSubmit })
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {error && (
-            <p className="text-sm font-bold text-red-500 bg-red-50 px-4 py-3 rounded-xl">{error}</p>
+            <div className="flex items-center gap-2 text-sm font-bold text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-xl">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              {error}
+            </div>
           )}
 
           {/* Title */}
           <div>
-            <label className="block text-xs font-black text-gray-500 uppercase tracking-wider mb-2">
-              Title *
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-black text-gray-500 uppercase tracking-wider">Title *</label>
+              <span className={`text-[10px] font-bold ${title.length > 90 ? 'text-red-400' : 'text-gray-300'}`}>{title.length}/100</span>
+            </div>
             <input
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => { setTitle(e.target.value); setTitleError(''); }}
               placeholder="Task title..."
-              required
-              className="w-full rounded-xl bg-gray-50 py-3 px-4 text-gray-800 font-medium outline-none border-2 border-transparent focus:border-brand/30 transition-all"
+              maxLength={100}
+              className={`w-full rounded-xl py-3 px-4 text-gray-800 font-medium outline-none border-2 transition-all ${titleError ? 'bg-red-50 border-red-300' : 'bg-gray-50 border-transparent focus:border-brand/30'}`}
             />
+            {titleError && <p className="mt-1.5 flex items-center gap-1 text-xs font-semibold text-red-500"><AlertCircle className="w-3.5 h-3.5" />{titleError}</p>}
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-black text-gray-500 uppercase tracking-wider mb-2">
-              Description
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-black text-gray-500 uppercase tracking-wider">Description</label>
+              <span className="text-[10px] font-bold text-gray-300">{description.length} chars</span>
+            </div>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -104,9 +121,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ task, onClose, onSubmit })
           {/* Category & Status */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-black text-gray-500 uppercase tracking-wider mb-2">
-                Category
-              </label>
+              <label className="block text-xs font-black text-gray-500 uppercase tracking-wider mb-2">Category</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -118,9 +133,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ task, onClose, onSubmit })
               </select>
             </div>
             <div>
-              <label className="block text-xs font-black text-gray-500 uppercase tracking-wider mb-2">
-                Status
-              </label>
+              <label className="block text-xs font-black text-gray-500 uppercase tracking-wider mb-2">Status</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as TaskStatus)}
@@ -135,30 +148,42 @@ export const TaskModal: React.FC<TaskModalProps> = ({ task, onClose, onSubmit })
 
           {/* Progress */}
           <div>
-            <label className="block text-xs font-black text-gray-500 uppercase tracking-wider mb-2">
-              Progress: <span className="text-brand">{progress}%</span>
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-black text-gray-500 uppercase tracking-wider">Progress</label>
+              <span className={`text-sm font-black ${progress === 100 ? 'text-green-500' : 'text-brand'}`}>{progress}%</span>
+            </div>
             <input
               type="range"
               min={0}
               max={100}
               value={progress}
               onChange={(e) => setProgress(Number(e.target.value))}
-              className="w-full accent-brand"
+              disabled={status === 'Done'}
+              className="w-full accent-brand disabled:opacity-50"
             />
+            <div className="mt-2 h-1.5 w-full rounded-full bg-gray-100">
+              <div className={`h-full rounded-full transition-all duration-500 ${progressColor}`} style={{ width: `${progress}%` }} />
+            </div>
           </div>
 
           {/* Due Date */}
           <div>
-            <label className="block text-xs font-black text-gray-500 uppercase tracking-wider mb-2">
-              Due Date
-            </label>
-            <input
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              className="w-full rounded-xl bg-gray-50 py-3 px-4 text-gray-800 font-medium outline-none border-2 border-transparent focus:border-brand/30 transition-all"
-            />
+            <label className="block text-xs font-black text-gray-500 uppercase tracking-wider mb-2">Due Date</label>
+            <div className="relative">
+              <input
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className={`w-full rounded-xl py-3 pl-4 pr-10 text-gray-800 font-medium outline-none border-2 transition-all ${dueDatePast ? 'bg-red-50 border-red-200 text-red-600' : 'bg-gray-50 border-transparent focus:border-brand/30'}`}
+              />
+              <Calendar className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none ${dueDatePast ? 'text-red-400' : 'text-gray-400'}`} />
+            </div>
+            {dueDatePast && (
+              <p className="mt-1.5 flex items-center gap-1 text-xs font-semibold text-red-500">
+                <AlertCircle className="w-3.5 h-3.5" />
+                This date is in the past.
+              </p>
+            )}
           </div>
 
           {/* Actions */}
